@@ -17,13 +17,8 @@ app.get('/api/get-all-data', (req, res) => {
 
 //Add data
 //body should contain "title"
-app.post('/api/add-data', async (req, res) => {
+app.post('/api/add-data', checkTitle, async (req, res) => {
     let title = req.body.title
-
-    if(!title){
-        res.status(400).json({ error: "Title should not be empty!" })
-        return
-    }
     
     if(!addData(title)){
         res.status(500).json({ error: "Something went wrong..." })
@@ -38,14 +33,9 @@ app.post('/api/add-data', async (req, res) => {
 //Edit or Update data
 //Add the id in the parameter
 //body should contain "title"
-app.post('/api/update-data/:id', async (req, res) => {
+app.post('/api/update-data/:id', checkId, checkTitle, async (req, res) => {
     const dataItem = data[req.params.id]
     const newTitle = req.body.title
-
-    if(!dataItem){
-        res.status(404).json({ message: "Item not found!" })
-        return
-    }
     if(!newTitle){
         res.status(400).json({ error: "Title should not be empty!" })
         return
@@ -95,6 +85,23 @@ function getCurrentDateTime(){
     const currentDateTime = new Date()
     const isoDate = currentDateTime.toISOString();
     return isoDate;
+}
+
+//Middleware
+function checkId(req, res, next){
+    if(!data[req.params.id]){
+        res.status(404).json({ message: "Item not found!" })
+        return
+    }
+    next()
+}
+
+function checkTitle(req, res, next){
+    if(!req.body.title){
+        res.status(400).json({ error: "Title should not be empty!" })
+        return
+    }
+    next()
 }
 
 app.listen(8080, '0.0.0.0')
