@@ -33,11 +33,12 @@ app.post('/api/add-data', checkTitle, async (req, res) => {
 //Edit or Update data
 //Add the id in the parameter
 //body should contain "title"
-app.post('/api/update-data/:id', checkId, checkTitle, async (req, res) => {
+app.post('/api/update-title/:id', checkId, checkTitle, async (req, res) => {
     const dataItem = data[req.params.id]
     const newTitle = req.body.title
 
     dataItem.title = newTitle
+
     if(!updateData(dataItem)){
         res.status(500).json({ error: "Something went wrong..." })
         return
@@ -52,7 +53,9 @@ app.post('/api/update-data/:id', checkId, checkTitle, async (req, res) => {
 //Add the id in the parameter
 app.delete('/api/delete-data/:id', checkId, async (req, res) => {
     const id = req.params.id
+
     delete data[id]
+
     if(data[id] != null){
         res.status(500).json({ error: "Something went wrong..." })
         return
@@ -73,6 +76,7 @@ function addData(title){
     const dataToAdd = {}
     dataToAdd.id = getAvailableId()
     dataToAdd.title = title
+    dataToAdd.checked = false
     dataToAdd.createdAt = getCurrentDateTime()
     dataToAdd.modifiedAt = getCurrentDateTime()
     data[dataToAdd.id] = dataToAdd
