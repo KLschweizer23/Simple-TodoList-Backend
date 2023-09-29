@@ -1,5 +1,10 @@
 /*
     Hi, This is Ken Lloyd's Work
+
+    To run while in staging area, run the following command:
+    `npm run devStart`
+    To trigger Nodemon for easier editing
+
     Below I created a Basic To-Do List Back-end that can do the following:
         1. Add To-Do Item
         2. Update Title of To-Do Item
@@ -18,7 +23,7 @@
         }
     }
 
-    Added Middleware to check for common errors to avoid duplications
+    Added Middleware to check for common errors to minimize duplications
     Added Proper Status Code Errors
 */
 
