@@ -1,3 +1,27 @@
+/*
+    Hi, This is Ken Lloyd's Work
+    Below I created a Basic To-Do List Back-end that can do the following:
+        1. Add To-Do Item
+        2. Update Title of To-Do Item
+        3. Toggle Check Status of To-Do Item
+        4. Delete To-Do Item
+        5. Get All To-Do Items
+    
+    Data Structure is:
+    data = {
+        :id {
+            id          - Unique ID by getting the time and date,
+            title       - Title of the To-Do Item,
+            checked     - Status of the To-Do Item if done or not,
+            createdAt   - Records the date and time To-Do Item is created,
+            modifiedAt  - Records the date and time To-Do Item last modified 
+        }
+    }
+
+    Added Middleware to check for common errors to avoid duplications
+    Added Proper Status Code Errors
+*/
+
 const express = require('express')
 
 const app = express()
@@ -50,18 +74,11 @@ app.post('/api/update-title/:id', checkId, checkTitle, async (req, res) => {
 })
 
 //Edit or Update checked
-//body should contain "checked" to update if the to-do item is checked or not via true or false only
+//Every time this api is called, automatically change the checked value to opposite value
 app.post('/api/update-checked/:id', checkId, async(req, res) => {
     const dataItem = data[req.params.id]
-    const isBoolean = req.body.checked == "true" ? true : req.body.checked == "false" ? false : null
-    if(isBoolean == null){
-        res.status(400).json({ error: "Invalid boolean value, it should only be 'true' or 'false'" })
-        return
-    }
 
-    const checked =  isBoolean == null ? dataItem.checked : isBoolean
-
-    dataItem.checked = checked
+    dataItem.checked = !dataItem.checked
 
     if(!updateData(dataItem)){
         res.status(500).json({ error: "Something went wrong..." })
