@@ -30,7 +30,7 @@ app.post('/api/add-data', checkTitle, async (req, res) => {
     displayData()
 })
 
-//Edit or Update data
+//Edit or Update title
 //Add the id in the parameter
 //body should contain "title"
 app.post('/api/update-title/:id', checkId, checkTitle, async (req, res) => {
@@ -38,6 +38,30 @@ app.post('/api/update-title/:id', checkId, checkTitle, async (req, res) => {
     const newTitle = req.body.title
 
     dataItem.title = newTitle
+
+    if(!updateData(dataItem)){
+        res.status(500).json({ error: "Something went wrong..." })
+        return
+    }
+
+    res.status(201).json({ message: "ToDo Item was successfuly updated!" })
+
+    displayData()
+})
+
+//Edit or Update checked
+//body should contain "checked" to update if the to-do item is checked or not via true or false only
+app.post('/api/update-checked/:id', checkId, async(req, res) => {
+    const dataItem = data[req.params.id]
+    const isBoolean = req.body.checked == "true" ? true : req.body.checked == "false" ? false : null
+    if(isBoolean == null){
+        res.status(400).json({ error: "Invalid boolean value, it should only be 'true' or 'false'" })
+        return
+    }
+
+    const checked =  isBoolean == null ? dataItem.checked : isBoolean
+
+    dataItem.checked = checked
 
     if(!updateData(dataItem)){
         res.status(500).json({ error: "Something went wrong..." })
@@ -86,7 +110,7 @@ function addData(title){
 function updateData(newData){
     newData.modifiedAt = getCurrentDateTime()
     data[newData.id] = newData
-    return data[newData.id].title == newData.title
+    return data[newData.id].title == newData.title && data[newData.id].checked == newData.checked
 }
 
 function getAvailableId(){
