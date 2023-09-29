@@ -36,10 +36,6 @@ app.post('/api/add-data', checkTitle, async (req, res) => {
 app.post('/api/update-data/:id', checkId, checkTitle, async (req, res) => {
     const dataItem = data[req.params.id]
     const newTitle = req.body.title
-    if(!newTitle){
-        res.status(400).json({ error: "Title should not be empty!" })
-        return
-    }
 
     dataItem.title = newTitle
     if(!updateData(dataItem)){
@@ -49,6 +45,20 @@ app.post('/api/update-data/:id', checkId, checkTitle, async (req, res) => {
 
     res.status(201).json({ message: "ToDo Item was successfuly updated!" })
 
+    displayData()
+})
+
+//Delete Data
+//Add the id in the parameter
+app.delete('/api/delete-data/:id', checkId, async (req, res) => {
+    const id = req.params.id
+    delete data[id]
+    if(data[id] != null){
+        res.status(500).json({ error: "Something went wrong..." })
+        return
+    }
+
+    res.status(201).json({ message: "ToDo Item was successfuly deleted!" })
     displayData()
 })
 
@@ -90,7 +100,7 @@ function getCurrentDateTime(){
 //Middleware
 function checkId(req, res, next){
     if(!data[req.params.id]){
-        res.status(404).json({ message: "Item not found!" })
+        res.status(404).json({ error: "Item not found!" })
         return
     }
     next()
