@@ -25,6 +25,13 @@
 
     Added Middleware to check for common errors to minimize duplications
     Added Proper Status Code Errors
+
+    APIs:
+    1. /api/get-all-data - Returns all data
+    2. /api/add-data (body: title) - Adds data with the title
+    3. /api/update-data/:id (body: title) - Updates data with the title base on id
+    4. /api/update-checked/:id - Updates and toggles the todo item if checked or not
+    5. /api/delete-data/:id - Deletes data base on the id
 */
 
 const express = require('express')
