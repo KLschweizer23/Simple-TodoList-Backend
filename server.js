@@ -41,7 +41,7 @@ const data = {}
 
 //Retrieve all data
 app.get('/api/get-all-data', (req, res) => {
-    res.send({ data })
+    res.send({ todos: data })
 })
 
 //Add data
@@ -53,10 +53,10 @@ app.post('/api/add-data', checkTitle, async (req, res) => {
         res.status(500).json({ error: "Something went wrong..." })
         return
     }
+    
+    res.send({ todos: returnData() })
 
-    res.status(201).json({ message: "ToDo Item was successfully added!" })
-
-    displayData()
+    // displayData()
 })
 
 //Edit or Update title
@@ -72,10 +72,10 @@ app.post('/api/update-title/:id', checkId, checkTitle, async (req, res) => {
         res.status(500).json({ error: "Something went wrong..." })
         return
     }
+    
+    res.send({ todos: returnData() })
 
-    res.status(201).json({ message: "ToDo Item was successfuly updated!" })
-
-    displayData()
+    // displayData()
 })
 
 //Edit or Update checked
@@ -89,10 +89,10 @@ app.post('/api/update-checked/:id', checkId, async(req, res) => {
         res.status(500).json({ error: "Something went wrong..." })
         return
     }
+    
+    res.send({ todos: returnData() })
 
-    res.status(201).json({ message: "ToDo Item was successfuly updated!" })
-
-    displayData()
+    // displayData()
 })
 
 //Delete Data
@@ -106,9 +106,10 @@ app.delete('/api/delete-data/:id', checkId, async (req, res) => {
         res.status(500).json({ error: "Something went wrong..." })
         return
     }
+    
+    res.send({ todos: returnData() })
 
-    res.status(201).json({ message: "ToDo Item was successfuly deleted!" })
-    displayData()
+    // displayData()
 })
 
 //FUNCTIONS
@@ -116,6 +117,16 @@ app.delete('/api/delete-data/:id', checkId, async (req, res) => {
 function displayData(){
     console.log("data:")
     console.log(data)
+}
+
+function returnData(){
+    const modifiedData = {}
+    for(const id in data){
+        modifiedData[id] = {}
+        modifiedData[id].title = data[id].title
+        modifiedData[id].checked = data[id].checked
+    }
+    return modifiedData
 }
 
 function addData(title){
