@@ -7,7 +7,7 @@
 
     Below I created a Basic To-Do List Back-end that can do the following:
         1. Add To-Do Item
-        2. Update Title of To-Do Item
+        2. Update Task of To-Do Item
         3. Toggle Check Status of To-Do Item
         4. Delete To-Do Item
         5. Get All To-Do Items
@@ -16,10 +16,7 @@
     data = {
         :id {
             id          - Unique ID by getting the time and date,
-            title       - Title of the To-Do Item,
-            checked     - Status of the To-Do Item if done or not,
-            createdAt   - Records the date and time To-Do Item is created,
-            modifiedAt  - Records the date and time To-Do Item last modified 
+            task        - Task of the To-Do Item
         }
     }
 
@@ -28,8 +25,8 @@
 
     APIs:
     1. /api/get-all-data - Returns all data
-    2. /api/add-data (body: title) - Adds data with the title
-    3. /api/update-data/:id (body: title) - Updates data with the title base on id
+    2. /api/add-data (body: task) - Adds data with the task
+    3. /api/update-data/:id (body: task) - Updates data with the task base on id
     4. /api/update-checked/:id - Updates and toggles the todo item if checked or not
     5. /api/delete-data/:id - Deletes data base on the id
 */
@@ -48,56 +45,40 @@ const data = {}
 
 //Retrieve all data
 app.get('/api/get-all-data', (req, res) => {
-    res.send({ todos: data })
+    let data = returnData()
+    let message = data.length == 0 ? "ToDo List is empty!" : "success"
+    res.send({ response: message, list_todos: data })
 })
 
 //Add data
-//body should contain "title"
-app.post('/api/add-data', checkTitle, async (req, res) => {
-    let title = req.body.title
+//body should contain "task"
+app.post('/api/add-data', checktask, async (req, res) => {
+    let task = req.body.task
     
-    if(!addData(title)){
-        res.status(500).json({ error: "Something went wrong..." })
+    if(!addData(task)){
+        res.status(500).json({ response: "Something went wrong..." , list_todos: returnData() })
         return
     }
     
-    res.send({ todos: returnData() })
+    res.send({ response: "success", list_todos: returnData() })
 
     // displayData()
 })
 
-//Edit or Update title
-//Add the id in the parameter
-//body should contain "title"
-app.post('/api/update-title/:id', checkId, checkTitle, async (req, res) => {
-    const dataItem = data[req.params.id]
-    const newTitle = req.body.title
+//Edit or Update task
+//body should contain "task" and "id"
+app.post('/api/update-task', checkId, checktask, async (req, res) => {
+    const dataItem = data[req.body.id]
+    const newtask = req.body.task
 
-    dataItem.title = newTitle
+    dataItem.task = newtask
 
     if(!updateData(dataItem)){
-        res.status(500).json({ error: "Something went wrong..." })
+        res.status(500).json({ response: "Something went wrong...", list_todos: returnData() })
         return
     }
     
-    res.send({ todos: returnData() })
-
-    // displayData()
-})
-
-//Edit or Update checked
-//Every time this api is called, automatically change the checked value to opposite value
-app.post('/api/update-checked/:id', checkId, async(req, res) => {
-    const dataItem = data[req.params.id]
-
-    dataItem.checked = !dataItem.checked
-
-    if(!updateData(dataItem)){
-        res.status(500).json({ error: "Something went wrong..." })
-        return
-    }
-    
-    res.send({ todos: returnData() })
+    res.send({ response: "success", todos: returnData() })
 
     // displayData()
 })
@@ -110,11 +91,11 @@ app.delete('/api/delete-data/:id', checkId, async (req, res) => {
     delete data[id]
 
     if(data[id] != null){
-        res.status(500).json({ error: "Something went wrong..." })
+        res.status(500).json({ response: "Something went wrong...", list_todos: returnData() })
         return
     }
     
-    res.send({ todos: returnData() })
+    res.send({ response: "success", list_todos: returnData() })
 
     // displayData()
 })
@@ -127,30 +108,26 @@ function displayData(){
 }
 
 function returnData(){
-    const modifiedData = {}
+    var arrayData = []
+    let count = 0
     for(const id in data){
-        modifiedData[id] = {}
-        modifiedData[id].title = data[id].title
-        modifiedData[id].checked = data[id].checked
+        arrayData.push(data[id])
+        count++
     }
-    return modifiedData
+    return arrayData
 }
 
-function addData(title){
+function addData(task){
     const dataToAdd = {}
     dataToAdd.id = getAvailableId()
-    dataToAdd.title = title
-    dataToAdd.checked = false
-    dataToAdd.createdAt = getCurrentDateTime()
-    dataToAdd.modifiedAt = getCurrentDateTime()
+    dataToAdd.task = task
     data[dataToAdd.id] = dataToAdd
     return data[dataToAdd.id] != null
 }
 
 function updateData(newData){
-    newData.modifiedAt = getCurrentDateTime()
     data[newData.id] = newData
-    return data[newData.id].title == newData.title && data[newData.id].checked == newData.checked
+    return data[newData.id].task == newData.task
 }
 
 function getAvailableId(){
@@ -159,24 +136,19 @@ function getAvailableId(){
     return idDate
 }
 
-function getCurrentDateTime(){
-    const currentDateTime = new Date()
-    const isoDate = currentDateTime.toISOString();
-    return isoDate;
-}
-
 //Middleware
 function checkId(req, res, next){
-    if(!data[req.params.id]){
-        res.status(404).json({ error: "Item not found!" })
+    const foundData = String(req.originalUrl).match("update") ? data[req.body.id] : data[req.params.id]
+    if(!foundData){
+        res.status(404).json({ response: "Item not found!", list_todos: returnData() })
         return
     }
     next()
 }
 
-function checkTitle(req, res, next){
-    if(!req.body.title){
-        res.status(400).json({ error: "Title should not be empty!" })
+function checktask(req, res, next){
+    if(!req.body.task){
+        res.status(400).json({ response: "Task should not be empty!", list_todos: returnData()  })
         return
     }
     next()
